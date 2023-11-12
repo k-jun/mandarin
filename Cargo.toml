@@ -1,0 +1,13 @@
+[package]
+name = "mandarin"
+version = "0.1.0"
+edition = "2021"
+authors = ["k-jun <keijun091221@gmail.com>"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0.75"
+serde = { version = "1.0", features = ["derive"] }
+structopt = "0.3.26"
+toml = "0.8.8"
