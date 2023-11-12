@@ -5,7 +5,7 @@ use std::{env, fs};
 use structopt::StructOpt;
 
 #[derive(StructOpt)]
-#[structopt(name = env!("CARGO_HOME"), version = env!("CARGO_PKG_VERSION"), author = env!("CARGO_PKG_AUTHORS"), about = "Declarative TOML configuration for Gmail filters")]
+#[structopt(name = env!("CARGO_PKG_NAME"), version = env!("CARGO_PKG_VERSION"), author = env!("CARGO_PKG_AUTHORS"), about = "Declarative TOML configuration for Gmail filters")]
 enum Mandarin {
     Init {},
     Path {},
@@ -64,40 +64,32 @@ read = true"
             };
 
             let entry = |s: &str| -> String {
-                format!("<entry><category term='filter'></category>{}</entry>", s)
+                format!("<entry>\n<category term='filter'></category>\n{}\n</entry>", s)
             };
 
             let feed = |s: &str| -> String {
-                format!("<?xml version='1.0' encoding='UTF-8'?>
-<feed xmlns='http://www.w3.org/2005/Atom' xmlns:apps='http://schemas.google.com/apps/2006'>
-    <title>Mail Filters</title>
-    <author>
-        <name>k-jun</name>
-        <email>k-jun@gmail.com</email>
-    </author>
-    {}
-</feed>", s)
+                format!("<?xml version='1.0' encoding='UTF-8'?>\n<feed xmlns='http://www.w3.org/2005/Atom' xmlns:apps='http://schemas.google.com/apps/2006'>\n{}\n</feed>", s)
             };
 
-            let mut output = String::new();
+            let mut es = Vec::new();
             for f in ct.filter {
-                let mut o = String::new();
+                let mut ps = Vec::new();
                 let kv = f.query.split(':').collect::<Vec<&str>>();
                 let (k, v) = (kv[0], &kv[1..].join(":"));
-                o += &property(k, v);
+                ps.push(property(k, v));
 
                 if let Some(label) = f.label {
-                    o += &property("label", &label);
+                    ps.push(property("label", &label));
                 }
                 if let Some(b) = f.archive {
-                    o += &property("shouldArchive", &b.to_string());
+                    ps.push(property("shouldArchive", &b.to_string()));
                 }
                 if let Some(b) = f.read {
-                    o += &property("shouldMarkAsRead", &b.to_string());
+                    ps.push(property("shouldMarkAsRead", &b.to_string()));
                 }
-                output += &entry(&o);
+                es.push(entry(&ps.join("\n")));
             }
-            println!("{}", feed(&output));
+            println!("{}", feed(&es.join("\n")));
         }
     }
     Ok(())
