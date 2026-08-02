@@ -64,7 +64,10 @@ read = true"
             };
 
             let entry = |s: &str| -> String {
-                format!("<entry>\n<category term='filter'></category>\n{}\n</entry>", s)
+                format!(
+                    "<entry>\n<category term='filter'></category>\n{}\n</entry>",
+                    s
+                )
             };
 
             let feed = |s: &str| -> String {
