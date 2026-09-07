@@ -1,6 +1,7 @@
 use anyhow::Result;
 use serde::Deserialize;
 use std::path::Path;
+use std::process::Command;
 use std::{env, fs};
 use structopt::StructOpt;
 
@@ -8,7 +9,7 @@ use structopt::StructOpt;
 #[structopt(name = env!("CARGO_PKG_NAME"), version = env!("CARGO_PKG_VERSION"), author = env!("CARGO_PKG_AUTHORS"), about = "Declarative TOML configuration for Gmail filters")]
 enum Mandarin {
     Init {},
-    Path {},
+    Edit {},
     Run {},
 }
 
@@ -54,7 +55,13 @@ read = true"
                 fs::write(&cp, contents)?;
             }
         }
-        Mandarin::Path {} => println!("{}", cp.display()),
+        Mandarin::Edit {} => {
+            let editor = env::var("EDITOR").unwrap_or_else(|_| "vim".to_string());
+            let status = Command::new(&editor).arg(&cp).status()?;
+            if !status.success() {
+                anyhow::bail!("editor '{}' exited with {}", editor, status);
+            }
+        }
         Mandarin::Run {} => {
             let cs = fs::read_to_string(cp)?;
             let ct: Config = toml::from_str(&cs)?;
